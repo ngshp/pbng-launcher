@@ -1,3 +1,5 @@
+const { autoUpdater } = require('electron-updater');
+autoUpdater.checkForUpdatesAndNotify();
 const { app, BrowserWindow, ipcMain, shell, dialog } = require('electron');
 const path = require('path');
 const { autoUpdater } = require('electron-updater');
