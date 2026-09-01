@@ -28,8 +28,13 @@
       "allowToChangeInstallationDirectory": true,
       "artifactName": "PBNG-Launcher-Setup-${version}.exe"
     },
-    "portable": {
+        "portable": {
       "artifactName": "PBNG-Launcher-Portable-${version}.exe"
+    },
+    "publish": {
+      "provider": "github",
+      "owner": "ngshp",
+      "repo": "pbng-launcher"
     }
   }
 }
