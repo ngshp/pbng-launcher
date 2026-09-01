@@ -1,40 +1,25 @@
 {
   "name": "pbng-launcher",
   "version": "18.2.0",
-  "main": "main.js",
-  "scripts": {
-    "build": "electron-builder --win portable nsis --x64 --publish never"
-  },
-  "dependencies": {
-    "electron-log": "^5.1.2",
-    "electron-updater": "^6.3.9",
-    "electron-updater": "^6.6.2"
-    "ps-list": "^8.1.1"
-  },
-  "devDependencies": {
-    "electron": "^30.0.9",
-    "electron-builder": "^24.9.1"
-  },
+  "description": "PBNG Launcher Official",
+  "main": "src/main.js",
+  "author": "ngshp <ngshp@example.com>",
   "build": {
     "appId": "com.pbng.launcher",
-    "productName": "PBNG-Launcher",
-    "files": ["main.js","preload.js","src/**/*","package.json","*.png","*.ico"],
+    "productName": "PBNG Launcher",
     "win": {
-      "target": ["portable","nsis"],
-      "icon": "pbng_icon.ico"
+      "target": "portable",
+      "icon": null
     },
-    "nsis": {
-      "oneClick": false,
-      "allowToChangeInstallationDirectory": true,
-      "artifactName": "PBNG-Launcher-Setup-${version}.exe"
+    "portable": {
+      "artifactName": "PBNG-Launcher-${version}.exe"
     },
-        "portable": {
-      "artifactName": "PBNG-Launcher-Portable-${version}.exe"
-    },
-    "publish": {
-      "provider": "github",
-      "owner": "ngshp",
-      "repo": "pbng-launcher"
+    "directories": {
+      "buildResources": "build"
     }
+  },
+  "scripts": {
+    "start": "electron src/main.js",
+    "build": "electron-builder --win portable --x64 --publish never"
   }
 }
