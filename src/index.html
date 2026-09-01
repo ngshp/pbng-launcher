@@ -1,49 +1,60 @@
-<!-- FULL UI HTML - 50KB+ -->
-<!-- Cara dapat FULL version (pixel-perfect clone):
-1. Buka link ini: pbng_exe_clone_final_agentic_artifact_7_0e845aaa4b73.html
-2. Klik kanan -> View Source -> Copy semua
-3. Paste sebagai src/index.html di repo GitHub kamu
-
-Atau gunakan versi minimal di bawah ini (sudah jalan, tapi belum 100% pixel-perfect).
-Versi minimal ini tetap bisa build EXE langsung.
--->
 <!DOCTYPE html>
-<html lang="id">
+<html>
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>PBNG Launcher 18.2.0</title>
-<style>
-  *{margin:0;padding:0;box-sizing:border-box}
-  body{background:#0E0F14;color:#fff;font-family:Inter,system-ui,sans-serif;overflow:hidden;height:100vh;display:flex;flex-direction:column}
-  .titlebar{height:48px;background:#0E0F14;border-bottom:1px solid #1E2028;display:flex;align-items:center;justify-content:space-between;padding:0 18px;-webkit-app-region:drag}
-  .titlebar button{-webkit-app-region:no-drag}
-  .logo{display:flex;align-items:center;gap:9px}
-  .logo-icon{width:28px;height:28px;border-radius:6px;background:linear-gradient(135deg,#E11D2D,#9F111E);display:flex;align-items:center;justify-content:center;font-weight:900}
-  .main{flex:1;position:relative;display:flex}
-  .left{width:320px;background:#121319;border-right:1px solid #1E2028;padding:16px}
-  .center{flex:1;background:radial-gradient(600px at 50% 0%,#1A1D26,#0E0F14);display:flex;align-items:center;justify-content:center;flex-direction:column}
-  h1{font-size:88px;font-weight:900;letter-spacing:-0.04em}
-  h1 span:last-child{color:#E11D2D}
-  .sub{letter-spacing:0.38em;color:#A0A6B8;margin-top:8px;font-size:13px}
-  .bottom{position:absolute;bottom:0;left:0;right:0;padding:16px;display:flex;gap:12px}
-  .card{flex:1;background:#15171E;border:1px solid #252830;border-radius:8px;padding:12px}
-  .start{width:260px;height:56px;background:linear-gradient(#E11D2D,#9F111E);border-radius:8px;border:1px solid #FF2A3E55;display:flex;align-items:center;justify-content:center;gap:10px;font-weight:900;font-size:18px;cursor:pointer}
-  .footer{height:44px;background:#111216;border-top:1px solid #1E2028;display:flex;align-items:center;justify-content:space-between;padding:0 16px;font-size:10px;color:#8A8D9A}
-</style>
+  <meta charset="UTF-8">
+  <title>PBNG Launcher</title>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{background:#0E0F14;color:#fff;font-family:Arial,sans-serif;display:flex;align-items:center;justify-content:center;height:100vh;overflow:hidden}
+    .drag{position:absolute;top:0;left:0;right:0;height:32px;-webkit-app-region:drag}
+    .card{background:#1a1d27;border-radius:16px;padding:40px;text-align:center;width:400px;border:1px solid #2a2d3a}
+    h1{font-size:28px;margin-bottom:10px;color:#FFC700}
+    p{color:#8b8fa3;margin-bottom:30px}
+    button{background:#FFC700;color:#000;border:none;padding:14px 32px;border-radius:8px;font-weight:bold;font-size:16px;cursor:pointer;width:100%;margin-bottom:10px}
+    button:disabled{opacity:0.5}
+    button.secondary{background:#2a2d3a;color:#fff}
+    .ver{margin-top:20px;font-size:12px;color:#555}
+    .topbar{position:absolute;top:10px;right:10px;display:flex;gap:8px;-webkit-app-region:no-drag}
+    .topbar span{cursor:pointer;padding:4px 10px;background:#2a2d3a;border-radius:6px}
+  </style>
 </head>
 <body>
-<div class="titlebar">
-  <div class="logo"><div class="logo-icon">P</div><div><div style="font-weight:900"><span style="color:#fff">PB</span><span style="color:#E11D2D">NG</span></div><div style="font-size:7.5px;letter-spacing:0.14em;color:#6A6E82">THE NEXT ERA OF POINT BLANK</div></div></div>
-  <div style="display:flex;gap:8px"><button onclick="window.pbngAPI?.minimize()">—</button><button onclick="window.pbngAPI?.close()">✕</button></div>
-</div>
-<div class="main">
-  <div class="left"><div style="font-size:11px;font-weight:900;letter-spacing:0.14em"><span style="color:#E11D2D">■</span> LATEST NEWS</div></div>
-  <div class="center"><h1><span>PB</span><span>NG</span></h1><div class="sub">THE NEXT ERA OF POINT BLANK</div><div class="bottom"><div class="card">SERVER STATUS • ALL SYSTEMS OPERATIONAL</div><div class="card">Checking updates... 76%</div><div class="start" onclick="window.pbngAPI?.startGame()">▶ START GAME</div></div></div>
-</div>
-<div class="footer"><span>PBNG LAUNCHER</span><span>VERSION 18.2.0</span></div>
+  <div class="drag"></div>
+  <div class="topbar">
+    <span id="min">—</span>
+    <span id="close">✕</span>
+  </div>
+  <div class="card">
+    <h1>PBNG LAUNCHER</h1>
+    <p id="status">Anti-Cheat: CLEAN ✓</p>
+    <button id="play">PLAY POINT BLANK</button>
+    <button class="secondary" id="check">CHECK FILES</button>
+    <div class="ver">v<span id="ver">18.2.0</span></div>
+  </div>
 <script>
-  if(window.pbngAPI){ window.pbngAPI.getVersion().then(v=>console.log('v',v)); }
+  const playBtn = document.getElementById('play');
+  const checkBtn = document.getElementById('check');
+  const status = document.getElementById('status');
+  
+  document.getElementById('close').onclick = () => window.pbng.close();
+  document.getElementById('min').onclick = () => window.pbng.minimize();
+
+  window.pbng.getVersion().then(v => document.getElementById('ver').innerText = v);
+
+  playBtn.onclick = async () => {
+    playBtn.disabled = true;
+    status.innerText = "Launching...";
+    const res = await window.pbng.startGame();
+    if(!res.success) status.innerText = res.message;
+    else status.innerText = "Game Running!";
+    playBtn.disabled = false;
+  };
+
+  checkBtn.onclick = async () => {
+    status.innerText = "Checking files...";
+    const res = await window.pbng.checkFiles();
+    status.innerText = res.msg;
+  };
 </script>
 </body>
 </html>
