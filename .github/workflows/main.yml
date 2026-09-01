@@ -9,29 +9,31 @@ jobs:
   build-exe:
     runs-on: windows-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Setup Node.js 18
+      - name: Setup Node 20
         uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: 20
 
-      - name: Install dependencies
-        run: npm install
+      - name: Create missing assets
+        run: |
+          mkdir -p assets
+          mkdir -p src
+          if not exist assets\icon.png echo dummy > assets\icon.png
+        shell: cmd
 
-      - name: Build EXE Portable
-        run: npm run build
+      - name: Install deps
+        run: npm install --no-audit --no-fund
+
+      - name: Build Portable EXE
+        run: npx electron-builder --win portable --x64 --publish never --config.win.icon=assets/icon.png
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: List dist
-        run: dir dist
-        shell: cmd
 
       - name: Upload EXE
         uses: actions/upload-artifact@v4
         with:
           name: PBNG-Launcher-EXE-v18.2.0
           path: dist/*.exe
-          retention-days: 30
+          if-no-files-found: error
