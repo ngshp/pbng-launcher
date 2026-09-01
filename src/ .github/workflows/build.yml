@@ -1,0 +1,51 @@
+name: Build PBNG Launcher EXE
+
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build EXE (electron-builder)
+        run: npm run build
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: List dist folder
+        run: dir dist
+        shell: cmd
+
+      - name: Upload EXE Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: PBNG-Launcher-EXE
+          path: |
+            dist/*.exe
+            dist/*.exe.blockmap
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Upload portable (if exists)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: PBNG-Launcher-DIST
+          path: dist/
+          retention-days: 7
