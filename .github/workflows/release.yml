@@ -3,6 +3,7 @@ on:
   push:
     branches: [ main ]
   workflow_dispatch:
+
 jobs:
   build:
     runs-on: windows-latest
@@ -12,17 +13,32 @@ jobs:
         with:
           node-version: 24
 
-      - name: Auto-fix build/icon.ico
+      - name: Auto-fix icon - COPY from root
         shell: pwsh
         run: |
           New-Item -ItemType Directory -Force -Path build | Out-Null
-          if (Test-Path "build/icon.ico") { Write-Host "build/icon.ico OK" }
-          elseif (Test-Path "pbng_icon.ico") { Copy-Item "pbng_icon.ico" "build/icon.ico" -Force; Write-Host "Copied pbng_icon.ico" }
-          elseif (Test-Path "icon.ico") { Copy-Item "icon.ico" "build/icon.ico" -Force; Write-Host "Copied icon.ico" }
-          elseif (Test-Path "icon.png") { Copy-Item "icon.png" "build/icon.ico" -Force; Write-Host "Copied icon.png as ico" }
-          else { Write-Host "No icon found - building with default" }
+          Write-Host "=== Checking icons ==="
+          if (Test-Path "build/icon.ico") { Write-Host "build/icon.ico EXISTS - OK" }
+          elseif (Test-Path "pbng_icon.ico") { 
+            Copy-Item "pbng_icon.ico" "build/icon.ico" -Force
+            Write-Host "COPIED pbng_icon.ico -> build/icon.ico"
+          }
+          elseif (Test-Path "icon.ico") {
+            Copy-Item "icon.ico" "build/icon.ico" -Force
+            Write-Host "COPIED icon.ico -> build/icon.ico"
+          }
+          elseif (Test-Path "icon.png") {
+            Copy-Item "icon.png" "build/icon.ico" -Force
+            Write-Host "COPIED icon.png -> build/icon.ico"
+          }
+          else {
+            Write-Host "WARNING: No icon found - building with default Electron icon"
+          }
+          Write-Host "=== build folder ==="
           dir build
-          dir
+          Write-Host "=== root ==="
+          dir *.ico
+          dir *.png
 
       - name: Install deps
         run: npm install --legacy-peer-deps
@@ -36,11 +52,14 @@ jobs:
         shell: bash
         run: echo "VERSION=$(node -p "require('./package.json').version")" >> $GITHUB_OUTPUT
 
-      - name: Release
+      - name: Release EXE
         uses: softprops/action-gh-release@v2
         with:
           tag_name: v${{ steps.ver.outputs.VERSION }}
           name: PBNG Launcher v${{ steps.ver.outputs.VERSION }}
+          body: |
+            🎮 PBNG Launcher v${{ steps.ver.outputs.VERSION }} - Anti-Cheat Protected
+            Download EXE below
           files: dist/*.exe
           fail_on_unmatched_files: false
         env:
