@@ -12,14 +12,35 @@ jobs:
       - uses: actions/setup-node@v5
         with:
           node-version: 24
-      - run: npm install --legacy-peer-deps
-      - run: npx electron-builder --win portable --x64 --publish never
-      - id: ver
+
+      - name: Create icon if missing
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path build | Out-Null
+          if (!(Test-Path "build/icon.ico")) {
+            Write-Host "Icon missing, will build without icon first to get default, then continue..."
+          }
+          dir build
+
+      - name: Install deps
+        run: npm install --legacy-peer-deps
+
+      - name: Build EXE
+        run: |
+          npx electron-builder --win portable --x64 --publish never --log
+        shell: cmd
+
+      - name: Get version
+        id: ver
         shell: bash
         run: echo "VERSION=$(node -p "require('./package.json').version")" >> $GITHUB_OUTPUT
-      - uses: softprops/action-gh-release@v2
+
+      - name: Release
+        uses: softprops/action-gh-release@v2
         with:
           tag_name: v${{ steps.ver.outputs.VERSION }}
+          name: PBNG Launcher v${{ steps.ver.outputs.VERSION }}
           files: dist/*.exe
+          fail_on_unmatched_files: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
