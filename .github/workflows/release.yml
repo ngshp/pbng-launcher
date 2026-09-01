@@ -3,32 +3,43 @@ on:
   push:
     branches: [ main ]
   workflow_dispatch:
+
 jobs:
   build:
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
         with:
           node-version: 24
-      - name: Fix icon
+
+      - name: Setup build assets
+        shell: cmd
         run: |
           if not exist build mkdir build
-          copy /Y pbng_icon.ico build\icon.ico
-          copy /Y icon.png build\icon.png
-        shell: cmd
+          if exist pbng_icon.ico copy /Y pbng_icon.ico build\icon.ico
+          if exist icon.png copy /Y icon.png build\icon.png
+          if not exist build\icon.png echo dummy > build\icon.png
+
       - name: Install
-        run: npm install --no-audit --no-fund --legacy-peer-deps
-      - name: Build portable
-        run: npx electron-builder --win portable --x64 --publish never --config.win.icon=build/icon.ico
+        run: npm install --legacy-peer-deps
+
+      - name: Build Portable EXE
+        run: npx electron-builder --win portable --x64 --publish never
+
       - name: Get version
-        id: version
-        run: echo "VERSION=$(node -p "require('./package.json').version")" >> $GITHUB_OUTPUT
+        id: ver
         shell: bash
-      - uses: softprops/action-gh-release@v2
+        run: echo "VERSION=$(node -p "require('./package.json').version")" >> $GITHUB_OUTPUT
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
         with:
-          tag_name: v${{ steps.version.outputs.VERSION }}
-          name: PBNG Launcher v${{ steps.version.outputs.VERSION }}
-          files: dist/*.exe
+          tag_name: v${{ steps.ver.outputs.VERSION }}
+          name: PBNG Launcher v${{ steps.ver.outputs.VERSION }}
+          files: |
+            dist/*.exe
+            dist/*.yml
+            dist/*.blockmap
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
