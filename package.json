@@ -1,7 +1,7 @@
 {
   "name": "pbng-launcher",
   "version": "18.2.0",
-  "description": "PBNG Launcher Official - Anti-Cheat Protected",
+  "description": "PBNG Launcher Official",
   "main": "src/main.js",
   "author": "ngshp",
   "license": "MIT",
@@ -13,7 +13,6 @@
   "build": {
     "appId": "com.pbng.launcher",
     "productName": "PBNG Launcher",
-    "copyright": "© 2025 PBNG Team",
     "directories": {
       "buildResources": "build"
     },
@@ -28,12 +27,9 @@
     "files": [
       "src/**/*",
       "index.html",
-      "package.json"
+      "!**/*.ts",
+      "!**/*.map"
     ]
-  },
-  "dependencies": {
-    "electron-store": "^8.1.0",
-    "electron-updater": "^6.1.7"
   },
   "devDependencies": {
     "electron": "^30.0.0",
