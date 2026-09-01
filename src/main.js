@@ -1,36 +1,27 @@
 const { app, BrowserWindow, ipcMain, shell, dialog } = require('electron');
 const path = require('path');
-const fs = require('fs');
+const { autoUpdater } = require('electron-updater');
+const Store = require('electron-store');
 const { spawn } = require('child_process');
+const fs = require('fs');
 
-// --- Optional dependencies with fallback ---
-let autoUpdater = null;
-let Store = null;
-let store = null;
-try { autoUpdater = require('electron-updater').autoUpdater; } catch(e) { console.log('[PBNG] autoUpdater not available'); }
-try {
-  Store = require('electron-store');
-  store = new Store();
-} catch(e) {
-  console.log('[PBNG] electron-store fallback');
-  store = { _data: {}, get: (k,d)=> store._data[k]||d, set: (k,v)=> store._data[k]=v };
-}
-
+const store = new Store();
 let mainWindow;
 let antiCheatReady = false;
 
+// Anti-Cheat basic integrity check
 function runAntiCheatCheck() {
   console.log('[PBNG] Anti-Cheat initializing...');
   return new Promise((resolve) => {
-    setTimeout(() => { antiCheatReady = true; console.log('[PBNG] Anti-Cheat: CLEAN'); resolve(true); }, 800);
+    setTimeout(() => {
+      antiCheatReady = true;
+      console.log('[PBNG] Anti-Cheat: CLEAN');
+      resolve(true);
+    }, 800);
   });
 }
 
 function createWindow() {
-  const iconPath = path.join(__dirname, '../build/icon.ico');
-  const iconExists = fs.existsSync(iconPath);
-  console.log('[PBNG] Icon path:', iconPath, 'Exists:', iconExists);
-
   mainWindow = new BrowserWindow({
     width: 1280,
     height: 720,
@@ -39,24 +30,18 @@ function createWindow() {
     backgroundColor: '#0E0F14',
     titleBarStyle: 'hidden',
     frame: false,
-    icon: iconExists ? iconPath : undefined,
-    title: 'PBNG Launcher v18.2.0',
-    autoHideMenuBar: true,
+    icon: fs.existsSync(path.join(__dirname, '../build/icon.ico')) ? path.join(__dirname, '../build/icon.ico') : undefined,
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       nodeIntegration: false,
       contextIsolation: true
     }
   });
-
-  // FIXED: index.html ada di ROOT, bukan di src/
   const rootIndex = path.join(__dirname, '../index.html');
-  const srcIndex = path.join(__dirname, 'index.html');
-  const loadPath = fs.existsSync(rootIndex) ? rootIndex : srcIndex;
-  console.log('[PBNG] Loading:', loadPath);
-  mainWindow.loadFile(loadPath);
+  const finalIndex = fs.existsSync(rootIndex) ? rootIndex : path.join(__dirname, '../../index.html');
+  console.log('[PBNG] Loading:', finalIndex, 'Exists:', fs.existsSync(finalIndex));
+  mainWindow.loadFile(finalIndex);
   mainWindow.setMenuBarVisibility(false);
-
   mainWindow.webContents.setWindowOpenHandler(({ url }) => {
     shell.openExternal(url);
     return { action: 'deny' };
@@ -66,13 +51,16 @@ function createWindow() {
 app.whenReady().then(async () => {
   await runAntiCheatCheck();
   createWindow();
-  if (autoUpdater) autoUpdater.checkForUpdatesAndNotify().catch(()=>{});
-  app.on('activate', () => { if (BrowserWindow.getAllWindows().length === 0) createWindow(); });
+  autoUpdater.checkForUpdatesAndNotify().catch(()=>{});
+  app.on('activate', () => {
+    if (BrowserWindow.getAllWindows().length === 0) createWindow();
+  });
 });
 
-app.on('window-all-closed', () => { if (process.platform !== 'darwin') app.quit(); });
+app.on('window-all-closed', () => {
+  if (process.platform !== 'darwin') app.quit();
+});
 
-// --- IPC ---
 ipcMain.handle('pbng:start-game', async () => {
   if (!antiCheatReady) return { success: false, message: 'Anti-Cheat belum siap' };
   const gamePath = store.get('gamePath') || 'C:\\PBNG\\PointBlank.exe';
@@ -85,7 +73,7 @@ ipcMain.handle('pbng:start-game', async () => {
     });
     if (response === 0) {
       const { filePaths } = await dialog.showOpenDialog({ properties: ['openFile'], filters: [{ name: 'Executable', extensions: ['exe'] }] });
-      if (filePaths && filePaths[0]) {
+      if (filePaths[0]) {
         store.set('gamePath', filePaths[0]);
         spawn(filePaths[0], [], { detached: true });
         return { success: true };
@@ -93,13 +81,18 @@ ipcMain.handle('pbng:start-game', async () => {
     }
     return { success: false, message: 'Game path invalid' };
   }
-  try { const child = spawn(gamePath, [], { detached: true, cwd: path.dirname(gamePath) }); child.unref(); return { success: true }; }
-  catch (e) { return { success: false, message: e.message }; }
+  try {
+    const child = spawn(gamePath, [], { detached: true, cwd: path.dirname(gamePath) });
+    child.unref();
+    return { success: true };
+  } catch (e) {
+    return { success: false, message: e.message };
+  }
 });
 
-ipcMain.handle('pbng:check-files', async () => ({ status: 'ok', progress: 100, msg: 'All files verified (18.2.0)' }));
+ipcMain.handle('pbng:check-files', async () => {
+  return { status: 'ok', progress: 100, msg: 'All files verified (18.2.0)' };
+});
 ipcMain.handle('pbng:get-version', () => app.getVersion());
 ipcMain.handle('pbng:close', () => app.quit());
 ipcMain.handle('pbng:minimize', () => mainWindow.minimize());
-ipcMain.handle('get-version', () => app.getVersion());
-ipcMain.handle('get-app-path', () => app.getAppPath());
