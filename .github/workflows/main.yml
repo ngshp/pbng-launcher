@@ -7,13 +7,13 @@ jobs:
   build-exe:
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
         with:
           node-version: 20
       - run: npm install
       - run: npx electron-builder --win portable nsis --x64 --publish never
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v5
         with:
           name: PBNG-Launcher-v18.2.0-with-Icon
           path: dist/*.exe
