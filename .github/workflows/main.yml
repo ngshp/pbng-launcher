@@ -1,39 +1,22 @@
 name: Build PBNG Launcher EXE Portable
-
 on:
   push:
     branches: [ main ]
   workflow_dispatch:
-
 jobs:
   build-exe:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
-
-      - name: Setup Node 20
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: 20
-
-      - name: Create missing assets
-        run: |
-          mkdir -p assets
-          mkdir -p src
-          if not exist assets\icon.png echo dummy > assets\icon.png
-        shell: cmd
-
-      - name: Install deps
-        run: npm install --no-audit --no-fund
-
-      - name: Build Portable EXE
-        run: npx electron-builder --win portable --x64 --publish never --config.win.icon=assets/icon.png
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Upload EXE
+      - name: Install
+        run: npm install
+      - name: Build EXE
+        run: npx electron-builder --win portable --x64 --publish never
+      - name: Upload
         uses: actions/upload-artifact@v4
         with:
-          name: PBNG-Launcher-EXE-v18.2.0
+          name: PBNG-Launcher-EXE
           path: dist/*.exe
-          if-no-files-found: error
