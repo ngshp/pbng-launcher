@@ -3,7 +3,7 @@
   "version": "18.2.0",
   "description": "PBNG Launcher Official - Anti-Cheat Protected",
   "main": "src/main.js",
-  "author": "ngshp <ngshp@pbng.id>",
+  "author": "ngshp",
   "license": "MIT",
   "private": false,
   "scripts": {
@@ -24,7 +24,12 @@
     "portable": {
       "artifactName": "PBNG-Launcher-v${version}.exe"
     },
-    "asar": true
+    "asar": true,
+    "files": [
+      "src/**/*",
+      "index.html",
+      "package.json"
+    ]
   },
   "dependencies": {
     "electron-store": "^8.1.0",
