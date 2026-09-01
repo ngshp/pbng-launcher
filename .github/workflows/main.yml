@@ -11,12 +11,9 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-      - name: Install
-        run: npm install
-      - name: Build EXE
-        run: npx electron-builder --win portable --x64 --publish never
-      - name: Upload
-        uses: actions/upload-artifact@v4
+      - run: npm install
+      - run: npx electron-builder --win portable nsis --x64 --publish never
+      - uses: actions/upload-artifact@v4
         with:
-          name: PBNG-Launcher-EXE
+          name: PBNG-Launcher-v18.2.0-with-Icon
           path: dist/*.exe
