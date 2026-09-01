@@ -12,28 +12,14 @@ jobs:
       - uses: actions/setup-node@v5
         with:
           node-version: 24
-
-      - name: Debug files
-        run: |
-          dir
-          type package.json
-        shell: cmd
-
-      - name: Install
-        run: npm install --legacy-peer-deps
-
-      - name: Build (no icon)
-        run: npx electron-builder --win portable --x64 --publish never -c.win.icon=null -c.buildVersion=18.2.0
-
-      - name: Get version
-        id: ver
+      - run: npm install --legacy-peer-deps
+      - run: npx electron-builder --win portable --x64 --publish never
+      - id: ver
         shell: bash
         run: echo "VERSION=$(node -p "require('./package.json').version")" >> $GITHUB_OUTPUT
-
       - uses: softprops/action-gh-release@v2
         with:
           tag_name: v${{ steps.ver.outputs.VERSION }}
-          name: PBNG Launcher v${{ steps.ver.outputs.VERSION }}
           files: dist/*.exe
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
