@@ -1,25 +1,33 @@
 {
   "name": "pbng-launcher",
   "version": "18.2.0",
-  "description": "PBNG Launcher Official",
+  "description": "PBNG Launcher Official - Anti-Cheat Protected",
   "main": "src/main.js",
-  "author": "ngshp <ngshp@example.com>",
-  "build": {
-    "appId": "com.pbng.launcher",
-    "productName": "PBNG Launcher",
-    "win": {
-      "target": "portable",
-      "icon": null
-    },
-    "portable": {
-      "artifactName": "PBNG-Launcher-${version}.exe"
-    },
-    "directories": {
-      "buildResources": "build"
-    }
-  },
+  "author": "ngshp <ngshp@pbng.id>",
+  "license": "MIT",
+  "private": false,
   "scripts": {
     "start": "electron src/main.js",
     "build": "electron-builder --win portable --x64 --publish never"
+  },
+  "build": {
+    "appId": "com.pbng.launcher",
+    "productName": "PBNG Launcher",
+    "copyright": "© 2025 PBNG Team",
+    "directories": {
+      "buildResources": "build"
+    },
+    "win": {
+      "target": "portable",
+      "icon": "build/icon.ico"
+    },
+    "portable": {
+      "artifactName": "PBNG-Launcher-v${version}.exe"
+    },
+    "asar": true
+  },
+  "devDependencies": {
+    "electron": "^30.0.0",
+    "electron-builder": "^24.9.0"
   }
 }
