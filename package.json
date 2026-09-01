@@ -1,53 +1,15 @@
 {
   "name": "pbng-launcher",
   "version": "18.2.0",
-  "description": "PBNG - The Next Era of Point Blank Launcher",
   "main": "main.js",
-  "homepage": "https://pbng.id",
-  "author": "PBNG Team <team@pbng.id>",
-  "license": "MIT",
-  "private": true,
-  "scripts": {
-    "start": "electron .",
-    "build": "electron-builder --win --publish never",
-    "dist": "electron-builder --win",
-    "postinstall": "electron-builder install-app-deps"
-  },
+  "scripts": { "build": "electron-builder --win portable --x64 --publish never" },
+  "dependencies": { "electron-log": "^5.1.2", "electron-updater": "^6.3.9", "ps-list": "^8.1.1" },
+  "devDependencies": { "electron": "^30.0.9", "electron-builder": "^24.9.1" },
   "build": {
     "appId": "com.pbng.launcher",
-    "productName": "PBNG Launcher",
-    "copyright": "Copyright © 2025 PBNG All Rights Reserved",
-    "win": {
-      "target": "nsis",
-      "icon": "build/icon.ico",
-      "requestedExecutionLevel": "requireAdministrator"
-    },
-    "nsis": {
-      "oneClick": false,
-      "allowToChangeInstallationDirectory": true,
-      "createDesktopShortcut": true,
-      "createStartMenuShortcut": true,
-      "shortcutName": "PBNG Launcher",
-      "installerIcon": "build/icon.ico",
-      "uninstallerIcon": "build/icon.ico"
-    },
-    "directories": {
-      "output": "dist",
-      "buildResources": "build"
-    },
-    "files": [
-      "main.js",
-      "preload.js",
-      "src/**/*",
-      "build/**/*"
-    ]
-  },
-  "devDependencies": {
-    "electron": "^28.2.0",
-    "electron-builder": "^24.9.1"
-  },
-  "dependencies": {
-    "electron-updater": "^6.1.7",
-    "electron-store": "^8.1.0"
+    "productName": "PBNG-Launcher",
+    "files": ["main.js","preload.js","src/**/*","package.json"],
+    "win": { "target": "portable" },
+    "portable": { "artifactName": "PBNG-Launcher-Portable-${version}.exe" }
   }
 }
