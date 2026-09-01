@@ -1,0 +1,27 @@
+name: Build PBNG Launcher EXE Portable
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build-exe:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: 'npm'
+      - run: npm install
+      - run: npm run build
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - run: dir dist
+        shell: cmd
+      - uses: actions/upload-artifact@v4
+        with:
+          name: PBNG-Launcher-EXE-v18.2.0
+          path: dist/*.exe
+          retention-days: 30
