@@ -1,22 +1,17 @@
-const { autoUpdater } = require('electron-updater');
-autoUpdater.checkForUpdatesAndNotify();
 const { app, BrowserWindow, ipcMain, shell, dialog } = require('electron');
 const path = require('path');
 const { autoUpdater } = require('electron-updater');
 const Store = require('electron-store');
-const { spawn, exec } = require('child_process');
+const { spawn } = require('child_process');
 const fs = require('fs');
 
 const store = new Store();
-
 let mainWindow;
 let antiCheatReady = false;
 
 // Anti-Cheat basic integrity check
 function runAntiCheatCheck() {
   console.log('[PBNG] Anti-Cheat initializing...');
-  // Simulated memory scan & file integrity
-  const blocked = ['cheatengine', 'speedhack', 'x64dbg'];
   return new Promise((resolve) => {
     setTimeout(() => {
       antiCheatReady = true;
@@ -39,15 +34,11 @@ function createWindow() {
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       nodeIntegration: false,
-      contextIsolation: true,
-      enableRemoteModule: false
+      contextIsolation: true
     }
   });
-
   mainWindow.loadFile(path.join(__dirname, 'src/index.html'));
   mainWindow.setMenuBarVisibility(false);
-
-  // External links -> default browser
   mainWindow.webContents.setWindowOpenHandler(({ url }) => {
     shell.openExternal(url);
     return { action: 'deny' };
@@ -57,10 +48,7 @@ function createWindow() {
 app.whenReady().then(async () => {
   await runAntiCheatCheck();
   createWindow();
-
-  // Auto updater (GitHub releases - optional)
   autoUpdater.checkForUpdatesAndNotify().catch(()=>{});
-
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) createWindow();
   });
@@ -70,11 +58,8 @@ app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') app.quit();
 });
 
-// IPC: Start Game
 ipcMain.handle('pbng:start-game', async () => {
-  if (!antiCheatReady) {
-    return { success: false, message: 'Anti-Cheat belum siap' };
-  }
+  if (!antiCheatReady) return { success: false, message: 'Anti-Cheat belum siap' };
   const gamePath = store.get('gamePath') || 'C:\\PBNG\\PointBlank.exe';
   if (!fs.existsSync(gamePath)) {
     const { response } = await dialog.showMessageBox(mainWindow, {
@@ -105,7 +90,6 @@ ipcMain.handle('pbng:start-game', async () => {
 ipcMain.handle('pbng:check-files', async () => {
   return { status: 'ok', progress: 100, msg: 'All files verified (18.2.0)' };
 });
-
 ipcMain.handle('pbng:get-version', () => app.getVersion());
 ipcMain.handle('pbng:close', () => app.quit());
 ipcMain.handle('pbng:minimize', () => mainWindow.minimize());
